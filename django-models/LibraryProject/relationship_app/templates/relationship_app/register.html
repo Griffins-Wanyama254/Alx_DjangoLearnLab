@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
     <h1>Register</h1>
@@ -12,5 +11,6 @@
         {{ form.as_p }}
         <button type="submit">Register</button>
     </form>
+    <a href="{% url 'login' %}">Login</a>
 </body>
 </html>
