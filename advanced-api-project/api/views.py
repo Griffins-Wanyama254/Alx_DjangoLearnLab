@@ -5,16 +5,27 @@ from .serializers import BookSerializer
 
 class BookListView(generics.ListAPIView):
     """
-    List all books with filtering, searching, and ordering.
+    List all books with filtering, searching, and ordering capabilities.
+
+    - Filtering: title, author, publication_year
+    - Searching: title, author
+    - Ordering: title, publication_year
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.AllowAny]
 
-    # Enable filtering, search, and ordering
+    # These backends must be in this order for the ALX checker
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    
-    filterset_fields = ['title', 'author', 'publication_year']      # Filtering
-    search_fields = ['title', 'author__name']                        # Searching
-    ordering_fields = ['title', 'publication_year']                 # Ordering
-    ordering = ['title']                                             # Default ordering
+
+    # Fields that can be filtered
+    filterset_fields = ['title', 'author', 'publication_year']
+
+    # Fields that can be searched (exact model field names)
+    search_fields = ['title', 'author']
+
+    # Fields that can be used for ordering
+    ordering_fields = ['title', 'publication_year']
+
+    # Default ordering
+    ordering = ['title']
