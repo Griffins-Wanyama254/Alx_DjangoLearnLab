@@ -131,6 +131,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return self.object.post.get_absolute_url()
 
+
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Comment
     form_class = CommentForm
@@ -140,8 +141,12 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         comment = self.get_object()
         return self.request.user == comment.author
 
+    def get_queryset(self):
+        return Comment.objects.filter(post_id=self.kwargs['post_pk'])
+
     def get_success_url(self):
         return self.object.post.get_absolute_url()
+
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Comment
@@ -151,21 +156,22 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         comment = self.get_object()
         return self.request.user == comment.author
 
+    def get_queryset(self):
+        return Comment.objects.filter(post_id=self.kwargs['post_pk'])
+
     def get_success_url(self):
         return self.object.post.get_absolute_url()
 
 # --------------------------
-# Tag and Search Views
+# Tagging and Search Views
 # --------------------------
-def posts_by_tag(request, tag_name):
-    posts = Post.objects.filter(tags__name=tag_name).order_by('-published_date')
-    return render(request, 'blog/post_list.html', {'posts': posts, 'tag': tag_name})
+def posts_by_tag(request, tag):
+    posts = Post.objects.filter(tags__name__in=[tag]).order_by('-published_date')
+    return render(request, 'blog/post_list.html', {'posts': posts, 'tag': tag})
 
 def search_posts(request):
-    query = request.GET.get('q', '')
-    results = Post.objects.filter(
-        Q(title__icontains=query) |
-        Q(content__icontains=query) |
-        Q(tags__name__icontains=query)
-    ).distinct()
-    return render(request, 'blog/search_results.html', {'posts': results, 'query': query})
+    query = request.GET.get('q')
+    posts = Post.objects.filter(
+        Q(title__icontains=query) | Q(content__icontains=query) | Q(tags__name__icontains=query)
+    ).distinct().order_by('-published_date')
+    return render(request, 'blog/post_list.html', {'posts': posts, 'query': query})
