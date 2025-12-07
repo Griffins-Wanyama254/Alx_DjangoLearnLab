@@ -9,7 +9,6 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from taggit.models import Tag
 
 # --------------------------
 # Home view
@@ -63,7 +62,6 @@ def profile_view(request):
         messages.success(request, "Profile updated successfully.")
     return render(request, 'blog/profile.html')
 
-
 # --------------------------
 # Post CRUD Views
 # --------------------------
@@ -115,7 +113,6 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         post = self.get_object()
         return self.request.user == post.author
 
-
 # --------------------------
 # Comment Views
 # --------------------------
@@ -157,21 +154,18 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def get_success_url(self):
         return self.object.post.get_absolute_url()
 
-
 # --------------------------
-# Search & Tag Views
+# Tag and Search Views
 # --------------------------
-def search_posts(request):
-    query = request.GET.get('q')
-    results = Post.objects.none()
-    if query:
-        results = Post.objects.filter(
-            Q(title__icontains=query) |
-            Q(content__icontains=query) |
-            Q(tags__name__icontains=query)
-        ).distinct()
-    return render(request, 'blog/search_results.html', {'results': results, 'query': query})
-
 def posts_by_tag(request, tag_name):
-    posts = Post.objects.filter(tags__name__in=[tag_name])
+    posts = Post.objects.filter(tags__name=tag_name).order_by('-published_date')
     return render(request, 'blog/post_list.html', {'posts': posts, 'tag': tag_name})
+
+def search_posts(request):
+    query = request.GET.get('q', '')
+    results = Post.objects.filter(
+        Q(title__icontains=query) |
+        Q(content__icontains=query) |
+        Q(tags__name__icontains=query)
+    ).distinct()
+    return render(request, 'blog/search_results.html', {'posts': results, 'query': query})
