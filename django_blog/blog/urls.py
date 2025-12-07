@@ -6,22 +6,22 @@ from .views import (
 
 
 urlpatterns = [
-    # Authentication URLs
-    path('', home, name='home'),
-    path('register/', register_view, name='register'),
-    path('login/', login_view, name='login'),
-    path('logout/', logout_view, name='logout'),
-    path('profile/', profile_view, name='profile'),
+    # Post URLs
+    path('', views.home, name='home'),
+    path('posts/', views.PostListView.as_view(), name='post-list'),
+    path('posts/new/', views.PostCreateView.as_view(), name='post-create'),
+    path('posts/<int:pk>/', views.PostDetailView.as_view(), name='post-detail'),
+    path('posts/<int:pk>/edit/', views.PostUpdateView.as_view(), name='post-update'),
+    path('posts/<int:pk>/delete/', views.PostDeleteView.as_view(), name='post-delete'),
 
-    # Blog Post CRUD URLs
-    path('posts/', PostListView.as_view(), name='post-list'),
-    path('posts/new/', PostCreateView.as_view(), name='post-create'),
-    path('posts/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
-    path('posts/<int:pk>/edit/', PostUpdateView.as_view(), name='post-update'),
-    path('posts/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
-
-
-    path('posts/<int:post_id>/comments/new/', views.add_comment, name='comment-add'),
+    # Comment URLs
+    path('posts/<int:post_pk>/comments/new/', views.CommentCreateView.as_view(), name='comment-create'),
     path('comments/<int:pk>/edit/', views.CommentUpdateView.as_view(), name='comment-update'),
     path('comments/<int:pk>/delete/', views.CommentDeleteView.as_view(), name='comment-delete'),
+
+    # Auth URLs
+    path('register/', views.register_view, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('profile/', views.profile_view, name='profile'),
 ]
