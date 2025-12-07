@@ -6,6 +6,15 @@
 <p>{{ post.content }}</p>
 <p><small>By {{ post.author.username }} on {{ post.published_date|date:"M d, Y H:i" }}</small></p>
 
+<!-- Display tags -->
+{% if post.tags.all %}
+    <p>Tags:
+        {% for tag in post.tags.all %}
+            <a href="{% url 'posts-by-tag' tag.name %}" style="margin-right:5px;">{{ tag.name }}</a>
+        {% endfor %}
+    </p>
+{% endif %}
+
 {% if user.is_authenticated and user == post.author %}
     <a href="{% url 'post-update' post.pk %}">Edit</a> |
     <a href="{% url 'post-delete' post.pk %}">Delete</a>

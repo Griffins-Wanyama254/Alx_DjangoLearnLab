@@ -24,4 +24,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
+
+    path('search/', views.search_posts, name='search-posts'),
+    path('tags/<str:tag_name>/', views.posts_by_tag, name='posts-by-tag'),
 ]
