@@ -1,20 +1,12 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Delete Post</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-<h1>Delete Post</h1>
 
-<p>Are you sure you want to delete "{{ object.title }}"?</p>
-
-<form method="POST">
+{% block content %}
+<h2>Delete Post</h2>
+<p>Are you sure you want to delete "{{ post.title }}"?</p>
+<form method="post">
     {% csrf_token %}
-    <button type="submit">Confirm Delete</button>
+    <button type="submit">Yes, delete</button>
 </form>
-
-<a href="{% url 'post-list' %}">Cancel</a>
-</body>
-</html>
+<a href="{% url 'post-detail' post.pk %}">Cancel</a>
+{% endblock %}

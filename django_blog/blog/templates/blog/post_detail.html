@@ -1,20 +1,15 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ post.title }}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+
+{% block content %}
 <h1>{{ post.title }}</h1>
 <p>{{ post.content }}</p>
-<p>By {{ post.author.username }} | {{ post.published_date }}</p>
+<p><small>By {{ post.author.username }} on {{ post.published_date|date:"M d, Y H:i" }}</small></p>
 
-{% if request.user == post.author %}
+{% if user.is_authenticated and user == post.author %}
     <a href="{% url 'post-update' post.pk %}">Edit</a> |
     <a href="{% url 'post-delete' post.pk %}">Delete</a>
 {% endif %}
 
-<a href="{% url 'post-list' %}">Back to Posts</a>
-</body>
-</html>
+<a href="{% url 'post-list' %}">Back to all posts</a>
+{% endblock %}
