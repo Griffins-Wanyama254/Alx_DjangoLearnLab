@@ -2,20 +2,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Blog Posts</title>
+    <title>All Blog Posts</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
 <h1>All Blog Posts</h1>
-{% for post in posts %}
-    <div>
-        <h2><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
-        <p>{{ post.content|truncatewords:20 }}</p>
-        <p>By {{ post.author.username }} | {{ post.published_date }}</p>
-    </div>
-{% empty %}
+
+{% if posts %}
+    {% for post in posts %}
+        <div>
+            <h2><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
+            <p>{{ post.content|truncatewords:20 }}</p>
+            <p>By {{ post.author.username }} | {{ post.published_date }}</p>
+            {% if request.user == post.author %}
+                <a href="{% url 'post-update' post.pk %}">Edit</a> |
+                <a href="{% url 'post-delete' post.pk %}">Delete</a>
+            {% endif %}
+        </div>
+        <hr>
+    {% endfor %}
+{% else %}
     <p>No posts available.</p>
-{% endfor %}
-<a href="{% url 'post-create' %}">Create New Post</a>
+{% endif %}
+
+{% if request.user.is_authenticated %}
+    <a href="{% url 'post-create' %}">Create New Post</a>
+{% else %}
+    <p><a href="{% url 'login' %}">Login</a> to create a post.</p>
+{% endif %}
+
+<a href="{% url 'home' %}">Back to Home</a>
 </body>
 </html>

@@ -11,7 +11,7 @@
 <p>By {{ post.author.username }} | {{ post.published_date }}</p>
 
 {% if request.user == post.author %}
-    <a href="{% url 'post-update' post.pk %}">Edit</a>
+    <a href="{% url 'post-update' post.pk %}">Edit</a> |
     <a href="{% url 'post-delete' post.pk %}">Delete</a>
 {% endif %}
 
