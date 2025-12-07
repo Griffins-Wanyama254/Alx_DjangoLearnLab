@@ -1,20 +1,24 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import CustomUserCreationForm, PostForm
-from .models import Post
+from .forms import CustomUserCreationForm, PostForm, CommentForm
+from .models import Post, Comment
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 
+# --------------------------
 # Home view
+# --------------------------
 def home(request):
     posts = Post.objects.all().order_by('-published_date')
     return render(request, 'blog/index.html', {'posts': posts})
 
-# Registration
+# --------------------------
+# Authentication views
+# --------------------------
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -29,7 +33,6 @@ def register_view(request):
         form = CustomUserCreationForm()
     return render(request, 'blog/register.html', {'form': form})
 
-# Login
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -44,13 +47,11 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'blog/login.html', {'form': form})
 
-# Logout
 def logout_view(request):
     logout(request)
     messages.success(request, "Logged out successfully.")
     return redirect('home')
 
-# Profile
 @login_required
 def profile_view(request):
     if request.method == 'POST':
@@ -60,9 +61,9 @@ def profile_view(request):
         messages.success(request, "Profile updated successfully.")
     return render(request, 'blog/profile.html')
 
-
-# Blog Post CRUD Views
-
+# --------------------------
+# Post CRUD Views
+# --------------------------
 class PostListView(ListView):
     model = Post
     template_name = 'blog/post_list.html'
@@ -73,6 +74,11 @@ class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/post_detail.html'
     context_object_name = 'post'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comment_form'] = CommentForm()
+        return context
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
@@ -105,3 +111,44 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+# --------------------------
+# Comment Views
+# --------------------------
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+
+    def form_valid(self, form):
+        post_pk = self.kwargs['post_pk']
+        post = get_object_or_404(Post, pk=post_pk)
+        form.instance.post = post
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return self.object.post.get_absolute_url()  # redirect back to post detail
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+    def get_success_url(self):
+        return self.object.post.get_absolute_url()
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = 'blog/comment_confirm_delete.html'
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+    def get_success_url(self):
+        return self.object.post.get_absolute_url()
