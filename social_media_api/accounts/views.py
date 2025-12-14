@@ -40,24 +40,20 @@ class ProfileView(APIView):
         return Response(serializer.data)
 
 
-class FollowUserView(APIView):
+class FollowUser(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, user_id):
         user_to_follow = get_object_or_404(User, id=user_id)
-
         if user_to_follow == request.user:
             return Response({"error": "You cannot follow yourself"}, status=400)
-
         request.user.following.add(user_to_follow)
         return Response({"message": "User followed successfully"})
 
-
-class UnfollowUserView(APIView):
+class UnfollowUser(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, user_id):
         user_to_unfollow = get_object_or_404(User, id=user_id)
-
         request.user.following.remove(user_to_unfollow)
         return Response({"message": "User unfollowed successfully"})
